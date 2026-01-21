@@ -46,14 +46,8 @@ public class TicketController {
 
     @PostMapping
     public ResponseEntity<TicketDto> postTicket(@RequestBody SaveTicketDto saveTicketDtoTicket){
-        //Recibo el tk y lo convierto en entidad
         Ticket ticketEntity = ticketMapper.toEntity(saveTicketDtoTicket);
-        //Guardo en DB el ticketEntiy
         Ticket savedTicket = ticketService.createTicket(ticketEntity);
-
-        //Si se creo correctamente continua el flujo, de lo contrario el GlobalHandler atrapa la excepción
-
-        //Convierto en Dto el ticket guardado para devolverlo
         TicketDto ticketDto = ticketMapper.toDto(savedTicket);
 
         //Crea la URI para devolver en el created
@@ -70,16 +64,14 @@ public class TicketController {
     public ResponseEntity<TicketDto> putTicket(@PathVariable Long id,@RequestBody TicketDto dto ){
         Ticket existingTicket = ticketService.getTicketById(id);
         ticketMapper.updateTicketFromDto(dto, existingTicket);
-        Ticket savedTicket = ticketService.saveTicket(existingTicket);
+        Ticket savedTicket = ticketService.updateTicket(existingTicket);
         return ResponseEntity.ok(ticketMapper.toDto(savedTicket));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id){
-        if (ticketService.deleteTicket(id)){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        ticketService.deleteTicket(id);
+        return ResponseEntity.noContent().build();
     }
 
 

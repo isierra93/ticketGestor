@@ -1,5 +1,6 @@
 package com.soluciones.ticketgestor.dtos;
 
+
 public class SaveTicketDto {
     private Long tkNumber;
     private String site;

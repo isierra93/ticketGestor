@@ -38,4 +38,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
     }
+
+    //Atrapa ResourceIncompleteException de los controladores
+    @ExceptionHandler(ResourceIncompleteException.class)
+    public ResponseEntity<ErrorDto> handleResourceIncompleteException(ResourceIncompleteException e){
+        ErrorDto errorDto = new ErrorDto(
+                e.getMessage(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+    }
 }

@@ -11,15 +11,16 @@ import java.time.LocalDateTime;
 public class TicketMapper {
 
     public TicketDto toDto(Ticket ticket){
+        TicketDto ticketDto = new TicketDto();
+        ticketDto.setTkNumber(ticket.getTkNumber());
+        ticketDto.setSite(ticket.getSite());
+        ticketDto.setPriority(ticket.getPriority());
+        ticketDto.setDescription(ticket.getDescription());
+        ticketDto.setType(ticket.getType());
+        ticketDto.setState(ticket.getState());
+        ticketDto.setCreatedDate(ticket.getCreatedDate());
 
-        return new TicketDto(
-                ticket.getTkNumber(),
-                ticket.getSite(),
-                ticket.getPriority(),
-                ticket.getCreatedDate(),
-                ticket.getDescription(),
-                ticket.getState(),
-                ticket.getType());
+        return ticketDto;
     }
 
     public Ticket toEntity(SaveTicketDto saveDto) {
@@ -38,6 +39,7 @@ public class TicketMapper {
     }
 
     public void updateTicketFromDto(TicketDto dto, Ticket entity){
+        entity.setTkNumber(dto.getTkNumber());
         entity.setSite(dto.getSite());
         entity.setPriority(dto.getPriority());
         entity.setDescription(dto.getDescription());

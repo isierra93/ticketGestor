@@ -14,7 +14,10 @@ public class Ticket {
 
     private Long tkNumber;
     private String site;
-    private String priority;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
+
     private LocalDateTime createdDate;
     private String description;
     private String state;
@@ -23,7 +26,7 @@ public class Ticket {
     public Ticket() {
     }
 
-    public Ticket(Long id, Long tkNumber, String site, String priority, LocalDateTime createdDate, String description, String state, String type) {
+    public Ticket(Long id, Long tkNumber, String site, Priority priority, LocalDateTime createdDate, String description, String state, String type) {
         this.id = id;
         this.tkNumber = tkNumber;
         this.site = site;
@@ -58,11 +61,11 @@ public class Ticket {
         this.site = site;
     }
 
-    public String getPriority() {
+    public Priority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(Priority priority) {
         this.priority = priority;
     }
 

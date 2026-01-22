@@ -1,11 +1,12 @@
 package com.soluciones.ticketgestor.dtos;
 
+import com.soluciones.ticketgestor.models.Priority;
 import java.time.LocalDateTime;
 
 public class TicketDto {
     private Long tkNumber;
     private String site;
-    private String priority;
+    private Priority priority;
     private LocalDateTime createdDate;
     private String description;
     private String state;
@@ -14,7 +15,7 @@ public class TicketDto {
     public TicketDto(){
     }
 
-    public TicketDto(Long tkNumber, String site, String priority, LocalDateTime createdDate, String description, String state, String type) {
+    public TicketDto(Long tkNumber, String site, Priority priority, LocalDateTime createdDate, String description, String state, String type) {
         this.tkNumber = tkNumber;
         this.site = site;
         this.priority = priority;
@@ -40,11 +41,11 @@ public class TicketDto {
         this.site = site;
     }
 
-    public String getPriority() {
+    public Priority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(Priority priority) {
         this.priority = priority;
     }
 

@@ -3,6 +3,7 @@ package com.soluciones.ticketgestor.exceptions;
 import com.soluciones.ticketgestor.dtos.ErrorDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -51,4 +52,31 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
     }
+
+    //Atrapa HttpMessageNotReadableException de la App
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException e){
+
+        //Mensaje personalizado por Enum Priority
+        if (e.getMessage().contains("Priority") && e.getMessage().contains("Enum")){
+            ErrorDto errorDto = new ErrorDto(
+                    "Error en la Prioridad del Ticket.",
+                    "Error en el Enum Prioridad del Ticket.",
+                    HttpStatus.BAD_REQUEST.value(),
+                    LocalDateTime.now()
+            );
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+        }
+
+        ErrorDto errorDto = new ErrorDto(
+                "Error de formato en el JSON.",
+                "Error de formato en el JSON." + HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+    }
+
 }

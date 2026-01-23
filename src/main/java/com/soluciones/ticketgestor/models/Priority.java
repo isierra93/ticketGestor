@@ -6,13 +6,13 @@ public enum Priority {
     MEDIA("MEDIA"),
     BAJA("BAJA");
 
-    private String descripcion;
+    private String description;
 
     Priority(String descripcion) {
-        this.descripcion = descripcion;
+        this.description = descripcion;
     }
 
     public String getDescripcion() {
-        return descripcion;
+        return description;
     }
 }

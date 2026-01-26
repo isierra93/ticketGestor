@@ -2,6 +2,7 @@ package com.soluciones.ticketgestor.mappers;
 
 import com.soluciones.ticketgestor.dtos.SaveTicketDto;
 import com.soluciones.ticketgestor.dtos.TicketDto;
+import com.soluciones.ticketgestor.models.State;
 import com.soluciones.ticketgestor.models.Ticket;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,7 @@ public class TicketMapper {
 
         // Valores por defecto
         ticket.setCreatedDate(LocalDateTime.now());
-        ticket.setState("ABIERTO");
+        ticket.setState(State.ABIERTO);
 
         return ticket;
     }

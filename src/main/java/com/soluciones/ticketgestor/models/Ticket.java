@@ -20,13 +20,16 @@ public class Ticket {
 
     private LocalDateTime createdDate;
     private String description;
-    private String state;
+
+    @Enumerated(EnumType.STRING)
+    private State state;
+
     private String type;
 
     public Ticket() {
     }
 
-    public Ticket(Long id, Long tkNumber, String site, Priority priority, LocalDateTime createdDate, String description, String state, String type) {
+    public Ticket(Long id, Long tkNumber, String site, Priority priority, LocalDateTime createdDate, String description, State state, String type) {
         this.id = id;
         this.tkNumber = tkNumber;
         this.site = site;
@@ -85,11 +88,11 @@ public class Ticket {
         this.description = description;
     }
 
-    public String getState() {
+    public State getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(State state) {
         this.state = state;
     }
 

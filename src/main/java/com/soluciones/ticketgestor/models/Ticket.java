@@ -18,11 +18,11 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
-    private LocalDateTime createdDate;
+    private LocalDateTime createdDate = LocalDateTime.now();
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private State state;
+    private State state = State.ABIERTO;
 
     private String type;
 

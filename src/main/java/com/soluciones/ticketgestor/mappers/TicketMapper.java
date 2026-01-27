@@ -32,10 +32,6 @@ public class TicketMapper {
         ticket.setDescription(saveDto.getDescription());
         ticket.setType(saveDto.getType());
 
-        // Valores por defecto
-        ticket.setCreatedDate(LocalDateTime.now());
-        ticket.setState(State.ABIERTO);
-
         return ticket;
     }
 

@@ -18,12 +18,12 @@ public class GlobalExceptionHandler {
 
         ErrorDto errorDto = new ErrorDto(
                 e.getMessage(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                HttpStatus.CONFLICT.value(),
                 LocalDateTime.now()
         );
 
-        return ResponseEntity.badRequest().body(errorDto);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorDto);
     }
 
     //Atrapa ResourceNotFoundException de los controladores

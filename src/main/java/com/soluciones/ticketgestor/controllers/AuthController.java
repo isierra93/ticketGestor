@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +40,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> postRegister(@RequestBody UserDto userDto){
         if (userRepository.existsByEmail(userDto.getEmail())){
-            throw new ResourceAlreadyExistsException("El email ya se encuentra en uso.");
+            throw new ResourceAlreadyExistsException("El email" + userDto.getEmail() + " ya se encuentra en uso.");
         }
 
         User userEntity = new User();
@@ -64,6 +65,6 @@ public class AuthController {
             return ResponseEntity.ok(token);
         }
 
-        throw new ResourceNotFoundException("No se encontró el usuario.");
+        throw new UsernameNotFoundException("No se encontró el usuario con email:" + userDto.getEmail());
     }
 }

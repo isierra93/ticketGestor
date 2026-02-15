@@ -2,8 +2,7 @@ package com.soluciones.ticketgestor.controllers;
 
 import com.soluciones.ticketgestor.dtos.UserDto;
 import com.soluciones.ticketgestor.exceptions.ResourceAlreadyExistsException;
-import com.soluciones.ticketgestor.exceptions.ResourceNotFoundException;
-import com.soluciones.ticketgestor.models.Role;
+import com.soluciones.ticketgestor.models.UserRole;
 import com.soluciones.ticketgestor.models.User;
 import com.soluciones.ticketgestor.repositories.UserRepository;
 import com.soluciones.ticketgestor.security.JwtUtils;
@@ -46,7 +45,7 @@ public class AuthController {
         User userEntity = new User();
         userEntity.setEmail(userDto.getEmail());
         userEntity.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        userEntity.setRole(Role.USER);
+        userEntity.setRole(UserRole.USER);
 
         userRepository.save(userEntity);
 

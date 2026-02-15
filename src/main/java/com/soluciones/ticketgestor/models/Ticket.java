@@ -16,27 +16,27 @@ public class Ticket {
     private String site;
 
     @Enumerated(EnumType.STRING)
-    private Priority priority;
+    private TicketPriority ticketPriority;
 
     private LocalDateTime createdDate = LocalDateTime.now();
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private State state = State.ABIERTO;
+    private TicketState ticketState = TicketState.ABIERTO;
 
     private String type;
 
     public Ticket() {
     }
 
-    public Ticket(Long id, Long tkNumber, String site, Priority priority, LocalDateTime createdDate, String description, State state, String type) {
+    public Ticket(Long id, Long tkNumber, String site, TicketPriority ticketPriority, LocalDateTime createdDate, String description, TicketState ticketState, String type) {
         this.id = id;
         this.tkNumber = tkNumber;
         this.site = site;
-        this.priority = priority;
+        this.ticketPriority = ticketPriority;
         this.createdDate = createdDate;
         this.description = description;
-        this.state = state;
+        this.ticketState = ticketState;
         this.type = type;
     }
 
@@ -64,12 +64,12 @@ public class Ticket {
         this.site = site;
     }
 
-    public Priority getPriority() {
-        return priority;
+    public TicketPriority getPriority() {
+        return ticketPriority;
     }
 
-    public void setPriority(Priority priority) {
-        this.priority = priority;
+    public void setPriority(TicketPriority ticketPriority) {
+        this.ticketPriority = ticketPriority;
     }
 
     public LocalDateTime getCreatedDate() {
@@ -88,12 +88,12 @@ public class Ticket {
         this.description = description;
     }
 
-    public State getState() {
-        return state;
+    public TicketState getState() {
+        return ticketState;
     }
 
-    public void setState(State state) {
-        this.state = state;
+    public void setState(TicketState ticketState) {
+        this.ticketState = ticketState;
     }
 
     public String getType() {

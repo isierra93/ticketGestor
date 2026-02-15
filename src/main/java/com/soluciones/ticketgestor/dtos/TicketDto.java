@@ -1,29 +1,29 @@
 package com.soluciones.ticketgestor.dtos;
 
-import com.soluciones.ticketgestor.models.Priority;
-import com.soluciones.ticketgestor.models.State;
+import com.soluciones.ticketgestor.models.TicketPriority;
+import com.soluciones.ticketgestor.models.TicketState;
 
 import java.time.LocalDateTime;
 
 public class TicketDto {
     private Long tkNumber;
     private String site;
-    private Priority priority;
+    private TicketPriority ticketPriority;
     private LocalDateTime createdDate;
     private String description;
-    private State state;
+    private TicketState ticketState;
     private String type;
 
     public TicketDto(){
     }
 
-    public TicketDto(Long tkNumber, String site, Priority priority, LocalDateTime createdDate, String description, State state, String type) {
+    public TicketDto(Long tkNumber, String site, TicketPriority ticketPriority, LocalDateTime createdDate, String description, TicketState ticketState, String type) {
         this.tkNumber = tkNumber;
         this.site = site;
-        this.priority = priority;
+        this.ticketPriority = ticketPriority;
         this.createdDate = createdDate;
         this.description = description;
-        this.state = state;
+        this.ticketState = ticketState;
         this.type = type;
     }
 
@@ -43,12 +43,12 @@ public class TicketDto {
         this.site = site;
     }
 
-    public Priority getPriority() {
-        return priority;
+    public TicketPriority getPriority() {
+        return ticketPriority;
     }
 
-    public void setPriority(Priority priority) {
-        this.priority = priority;
+    public void setPriority(TicketPriority ticketPriority) {
+        this.ticketPriority = ticketPriority;
     }
 
     public LocalDateTime getCreatedDate() {
@@ -67,12 +67,12 @@ public class TicketDto {
         this.description = description;
     }
 
-    public State getState() {
-        return state;
+    public TicketState getState() {
+        return ticketState;
     }
 
-    public void setState(State state) {
-        this.state = state;
+    public void setState(TicketState ticketState) {
+        this.ticketState = ticketState;
     }
 
     public String getType() {

@@ -1,6 +1,6 @@
 package com.soluciones.ticketgestor.models;
 
-public enum Priority {
+public enum TicketPriority {
     URGENTE("URGENTE"),
     ALTA("ALTA"),
     MEDIA("MEDIA"),
@@ -8,7 +8,7 @@ public enum Priority {
 
     private String description;
 
-    Priority(String descripcion) {
+    TicketPriority(String descripcion) {
         this.description = descripcion;
     }
 

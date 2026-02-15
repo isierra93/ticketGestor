@@ -2,11 +2,8 @@ package com.soluciones.ticketgestor.mappers;
 
 import com.soluciones.ticketgestor.dtos.SaveTicketDto;
 import com.soluciones.ticketgestor.dtos.TicketDto;
-import com.soluciones.ticketgestor.models.State;
 import com.soluciones.ticketgestor.models.Ticket;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Component
 public class TicketMapper {

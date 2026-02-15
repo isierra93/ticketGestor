@@ -1,8 +1,8 @@
 package com.soluciones.ticketgestor;
 
 import com.soluciones.ticketgestor.exceptions.ResourceAlreadyExistsException;
-import com.soluciones.ticketgestor.models.Priority;
-import com.soluciones.ticketgestor.models.State;
+import com.soluciones.ticketgestor.models.TicketPriority;
+import com.soluciones.ticketgestor.models.TicketState;
 import com.soluciones.ticketgestor.models.Ticket;
 import com.soluciones.ticketgestor.repositories.TicketRepository;
 import com.soluciones.ticketgestor.services.TicketServiceImp;
@@ -30,7 +30,7 @@ class TicketServiceImpTest {
         Ticket newTicket = new Ticket();
         newTicket.setTkNumber(100L);
         newTicket.setSite("Sucursal Test");
-        newTicket.setPriority(Priority.ALTA);
+        newTicket.setPriority(TicketPriority.ALTA);
         newTicket.setDescription("Descripción de prueba");
         newTicket.setType("Mantenimiento");
         // State y Date ya se ponen solos por defecto ;)
@@ -44,7 +44,7 @@ class TicketServiceImpTest {
 
         // THEN: Verificamos
         assertNotNull(savedTicket);
-        assertEquals(State.ABIERTO, savedTicket.getState()); // Verificamos que naciera ABIERTO
+        assertEquals(TicketState.ABIERTO, savedTicket.getState()); // Verificamos que naciera ABIERTO
         verify(ticketRepository).save(newTicket);
     }
 
@@ -54,7 +54,7 @@ class TicketServiceImpTest {
         Ticket duplicateTicket = new Ticket();
         duplicateTicket.setTkNumber(999L);
         duplicateTicket.setSite("Sucursal A");
-        duplicateTicket.setPriority(Priority.MEDIA);
+        duplicateTicket.setPriority(TicketPriority.MEDIA);
         duplicateTicket.setDescription("Ticket duplicado");
         duplicateTicket.setType("Soporte");
         //State y Date son automáticos

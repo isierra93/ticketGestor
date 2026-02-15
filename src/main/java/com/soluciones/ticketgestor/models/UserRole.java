@@ -1,14 +1,13 @@
 package com.soluciones.ticketgestor.models;
 
-public enum State {
-    ABIERTO("ABIERTO"),
-    ASIGNADO("ASIGNADO"),
-    EN_CURSO("EN_CURSO"),
-    CERRADO("CERRADO");
+public enum UserRole {
+
+    ADMIN("ADMIN"),
+    USER("USER");
 
     private String description;
 
-    State(String description) {
+    UserRole(String description) {
         this.description = description;
     }
 

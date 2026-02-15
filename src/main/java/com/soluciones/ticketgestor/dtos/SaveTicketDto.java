@@ -1,22 +1,22 @@
 package com.soluciones.ticketgestor.dtos;
 
 
-import com.soluciones.ticketgestor.models.Priority;
+import com.soluciones.ticketgestor.models.TicketPriority;
 
 public class SaveTicketDto {
     private Long tkNumber;
     private String site;
-    private Priority priority;
+    private TicketPriority ticketPriority;
     private String description;
     private String type;
 
     public SaveTicketDto() {
     }
 
-    public SaveTicketDto(Long tkNumber, String site, Priority priority, String description, String type) {
+    public SaveTicketDto(Long tkNumber, String site, TicketPriority ticketPriority, String description, String type) {
         this.tkNumber = tkNumber;
         this.site = site;
-        this.priority = priority;
+        this.ticketPriority = ticketPriority;
         this.description = description;
         this.type = type;
     }
@@ -37,12 +37,12 @@ public class SaveTicketDto {
         this.site = site;
     }
 
-    public Priority getPriority() {
-        return priority;
+    public TicketPriority getPriority() {
+        return ticketPriority;
     }
 
-    public void setPriority(Priority priority) {
-        this.priority = priority;
+    public void setPriority(TicketPriority ticketPriority) {
+        this.ticketPriority = ticketPriority;
     }
 
     public String getDescription() {

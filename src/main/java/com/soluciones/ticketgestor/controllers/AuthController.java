@@ -39,7 +39,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> postRegister(@RequestBody UserDto userDto){
         if (userRepository.existsByEmail(userDto.getEmail())){
-            throw new ResourceAlreadyExistsException("El email" + userDto.getEmail() + " ya se encuentra en uso.");
+            throw new ResourceAlreadyExistsException("El email: " + userDto.getEmail() + " ya se encuentra en uso.");
         }
 
         User userEntity = new User();

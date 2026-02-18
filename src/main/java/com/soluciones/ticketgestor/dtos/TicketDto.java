@@ -13,11 +13,13 @@ public class TicketDto {
     private String description;
     private TicketState ticketState;
     private String type;
+    private UserOwnerDto userOwnerDto;
 
     public TicketDto(){
     }
 
-    public TicketDto(Long tkNumber, String site, TicketPriority ticketPriority, LocalDateTime createdDate, String description, TicketState ticketState, String type) {
+    public TicketDto(Long tkNumber, String site, TicketPriority ticketPriority, LocalDateTime createdDate,
+                     String description, TicketState ticketState, String type, UserOwnerDto userOwnerDto) {
         this.tkNumber = tkNumber;
         this.site = site;
         this.ticketPriority = ticketPriority;
@@ -25,6 +27,7 @@ public class TicketDto {
         this.description = description;
         this.ticketState = ticketState;
         this.type = type;
+        this.userOwnerDto = userOwnerDto;
     }
 
     public Long getTkNumber() {
@@ -81,5 +84,13 @@ public class TicketDto {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public UserOwnerDto getUserOwnerDto() {
+        return userOwnerDto;
+    }
+
+    public void setUserOwnerDto(UserOwnerDto userOwnerDto) {
+        this.userOwnerDto = userOwnerDto;
     }
 }

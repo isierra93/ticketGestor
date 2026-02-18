@@ -26,10 +26,23 @@ public class Ticket {
 
     private String type;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public Ticket() {
     }
 
-    public Ticket(Long id, Long tkNumber, String site, TicketPriority ticketPriority, LocalDateTime createdDate, String description, TicketState ticketState, String type) {
+    public Ticket(Long id, Long tkNumber, String site, TicketPriority ticketPriority, LocalDateTime createdDate,
+                  String description, TicketState ticketState, String type, User user) {
         this.id = id;
         this.tkNumber = tkNumber;
         this.site = site;
@@ -38,6 +51,8 @@ public class Ticket {
         this.description = description;
         this.ticketState = ticketState;
         this.type = type;
+        this.user = user;
+
     }
 
     public Long getId() {

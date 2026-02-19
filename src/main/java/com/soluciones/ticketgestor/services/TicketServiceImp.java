@@ -48,8 +48,8 @@ public class TicketServiceImp implements TicketService{
     public Ticket updateTicket(Ticket ticket){
         this.validateNulls(ticket);
 
-        if (!ticketRepository.existsById(ticket.getId())){
-            throw new ResourceNotFoundException("No se encontro el Ticket con ID: " + ticket.getId());
+        if (ticketRepository.existsByTkNumber(ticket.getTkNumber())){
+            throw new ResourceAlreadyExistsException("El Tk Number: " + ticket.getTkNumber() +" ya existe.");
         }
 
         return ticketRepository.save(ticket);

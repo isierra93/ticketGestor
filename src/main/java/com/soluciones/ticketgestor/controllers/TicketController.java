@@ -4,8 +4,12 @@ import com.soluciones.ticketgestor.dtos.SaveTicketDto;
 import com.soluciones.ticketgestor.dtos.TicketDto;
 import com.soluciones.ticketgestor.mappers.TicketMapper;
 import com.soluciones.ticketgestor.models.Ticket;
+import com.soluciones.ticketgestor.models.User;
+import com.soluciones.ticketgestor.services.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.soluciones.ticketgestor.services.TicketService;
@@ -22,6 +26,9 @@ public class TicketController {
 
     @Autowired
     private TicketMapper ticketMapper;
+
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
     @GetMapping
     public ResponseEntity<List<TicketDto>> getTickets(){
@@ -42,8 +49,13 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<TicketDto> postTicket(@RequestBody SaveTicketDto saveTicketDtoTicket){
-        Ticket ticketEntity = ticketMapper.toEntity(saveTicketDtoTicket);
+    public ResponseEntity<TicketDto> postTicket(
+            @RequestBody SaveTicketDto saveTicketDto,
+            @AuthenticationPrincipal UserDetails userDetails){
+
+        User user = userServiceImpl.getUserByEmail(userDetails.getUsername());
+        Ticket ticketEntity = ticketMapper.toEntity(saveTicketDto, user);
+
         Ticket savedTicket = ticketService.createTicket(ticketEntity);
         TicketDto ticketDto = ticketMapper.toDto(savedTicket);
 
@@ -57,8 +69,8 @@ public class TicketController {
         return ResponseEntity.created(location).body(ticketDto);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<TicketDto> putTicket(@PathVariable Long id,@RequestBody TicketDto dto ){
+    @PutMapping("/{id}")
+    public ResponseEntity<TicketDto> putTicket(@PathVariable Long id, @RequestBody TicketDto dto){
         Ticket existingTicket = ticketService.getTicketById(id);
         ticketMapper.updateTicketFromDto(dto, existingTicket);
         Ticket savedTicket = ticketService.updateTicket(existingTicket);
@@ -70,7 +82,5 @@ public class TicketController {
         ticketService.deleteTicket(id);
         return ResponseEntity.noContent().build();
     }
-
-
 
 }

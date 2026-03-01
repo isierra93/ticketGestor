@@ -18,6 +18,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
     //Encriptacion
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -30,6 +33,7 @@ public class SecurityConfig {
         return httpSecurity
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
+                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests( auth -> auth
                         .requestMatchers("/auth/login", "/auth/register", "/swagger-ui/**", "/v3/api-docs*/**").permitAll()
                         .anyRequest().authenticated()

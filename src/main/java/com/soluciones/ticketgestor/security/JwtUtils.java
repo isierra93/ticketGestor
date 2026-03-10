@@ -1,6 +1,7 @@
 package com.soluciones.ticketgestor.security;
 
 import com.soluciones.ticketgestor.models.User;
+import com.soluciones.ticketgestor.services.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,10 +23,12 @@ public class JwtUtils {
     @Value("${security.jwt.expiration-time}")
     private Long jwtExpiration;
 
-    public String generateToken(User user){
+    public String generateToken(UserDetails userDetails){
+        String userRole = userDetails.getAuthorities().iterator().next().getAuthority();
+
         return Jwts.builder()
-                .setSubject(user.getEmail())
-                .claim("role", user.getRole().getDescription())
+                .setSubject(userDetails.getUsername())
+                .claim("role", userRole)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey(),

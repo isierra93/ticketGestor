@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/ticket")
+@RequestMapping("/api/ticket")
 @Tag(name = "Ticket Controller", description = "Endpoints para el manejo de tickets.")
 @SecurityRequirement(name = "bearerAuth")
 public class TicketController {
@@ -357,6 +358,7 @@ public class TicketController {
             }
     )
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id){
         ticketService.deleteTicket(id);
         return ResponseEntity.noContent().build();

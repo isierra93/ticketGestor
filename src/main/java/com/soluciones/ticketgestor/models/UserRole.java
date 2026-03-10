@@ -1,9 +1,13 @@
 package com.soluciones.ticketgestor.models;
 
-public enum UserRole {
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.GrantedAuthority;
 
-    ADMIN("ADMIN"),
-    USER("USER");
+public enum UserRole implements GrantedAuthority {
+
+    ADMIN("ROLE_ADMIN"),
+    AGENT("ROLE_AGENT"),
+    CLIENT("ROLE_CLIENT");
 
     private String description;
 
@@ -13,5 +17,10 @@ public enum UserRole {
 
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public @Nullable String getAuthority() {
+        return this.getDescription();
     }
 }

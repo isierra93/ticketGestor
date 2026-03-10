@@ -4,6 +4,8 @@ import com.soluciones.ticketgestor.dtos.ErrorDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -90,6 +92,28 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorDto> handleBadCredentialsException(BadCredentialsException e){
+        ErrorDto errorDto = new ErrorDto(
+                "Email o contraseña incorrectos.",
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                HttpStatus.UNAUTHORIZED.value(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorDto> handleAccessDeniedException(AccessDeniedException e){
+        ErrorDto errorDto = new ErrorDto(
+                "Acceso denegado. No tienes el rol necesario para realizar esta acción.",
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                HttpStatus.FORBIDDEN.value(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorDto);
     }
 
 }

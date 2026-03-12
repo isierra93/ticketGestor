@@ -55,6 +55,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
     }
 
+    //Atrapa InvalidDataFormatException de los controladores
+    @ExceptionHandler(InvalidDataFormatException.class)
+    public ResponseEntity<ErrorDto> handleInvalidDataFormatException(InvalidDataFormatException e){
+        ErrorDto errorDto = new ErrorDto(
+                e.getMessage(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+    }
+
     //Atrapa HttpMessageNotReadableException de la App
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException e){
@@ -86,7 +99,7 @@ public class GlobalExceptionHandler {
         //Mensaje genérico de error
         ErrorDto errorDto = new ErrorDto(
                 "Error de formato en el JSON.",
-                "Error de formato en el JSON." + HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 HttpStatus.BAD_REQUEST.value(),
                 LocalDateTime.now()
         );

@@ -1,6 +1,7 @@
 package com.soluciones.ticketgestor.controllers;
 
 import com.soluciones.ticketgestor.dtos.ErrorDto;
+import com.soluciones.ticketgestor.dtos.TokenDto;
 import com.soluciones.ticketgestor.dtos.UserDto;
 import com.soluciones.ticketgestor.models.User;
 import com.soluciones.ticketgestor.security.JwtUtils;
@@ -133,13 +134,15 @@ public class AuthController {
                             responseCode = "200",
                             description = "Inicio de sesión correcto. Recibe un Token JWT.",
                             content = @Content(
-                                    mediaType = "text/plain",
+                                    mediaType = "application/json",
+                                    schema = @Schema (implementation = TokenDto.class),
                                     examples =
                                     @ExampleObject(
-                                            value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QEYuY29tIiwicm9sZSI6IlJPTEVfQ" +
-                                                    "UdFTlQiLCJpYXQiOjE3NzMzMTM5MjMsImV4cCI6MTc3MzQwMDMyM30.9I-OSUM3hWt" +
-                                                    "4q_A9uxfVehIBL8_XFUQrSVy7RN315R0"+
-                                                    "4q_A9uxfVehIBL8_XFUQrSVy7RN315R0"
+                                            value = """
+                                                    {
+                                                      "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhMiIsInJvbGUiOiJST0xFX0FETUlOIiwiaWF0IjoxNzczMzE1NDIwLCJleHAiOjE3NzM0MDE4MjB9.hFzdWNZ6HN7qfZ3FPyxq8DzrssowQNdovUULBq43-30"
+                                                    }
+                                                    """
                                     )
                             )
                     ),
@@ -179,14 +182,14 @@ public class AuthController {
                                     )
                             )
                     )
-
-            })
+            }
+    )
     @PostMapping("/login")
-    public ResponseEntity<?> postLogin(@RequestBody UserDto userDto){
+    public ResponseEntity<TokenDto> postLogin(@RequestBody UserDto userDto){
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken (userDto.getEmail(), userDto.getPassword())
         );
-        String token = jwtUtils.generateToken((UserDetails) auth.getPrincipal());
-        return ResponseEntity.ok(token);
+        TokenDto tokenDto = new TokenDto(jwtUtils.generateToken((UserDetails) auth.getPrincipal()));
+        return ResponseEntity.ok(tokenDto);
     }
 }

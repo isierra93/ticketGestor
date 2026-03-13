@@ -29,7 +29,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/ticket")
+@RequestMapping("/ticket")
 @Tag(name = "Ticket Controller", description = "Endpoints para el manejo de tickets.")
 @SecurityRequirement(name = "bearerAuth")
 public class TicketController {

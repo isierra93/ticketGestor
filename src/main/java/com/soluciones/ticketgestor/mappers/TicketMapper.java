@@ -5,16 +5,17 @@ import com.soluciones.ticketgestor.dtos.TicketDto;
 import com.soluciones.ticketgestor.dtos.UserOwnerDto;
 import com.soluciones.ticketgestor.models.Ticket;
 import com.soluciones.ticketgestor.models.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TicketMapper {
 
-    @Autowired
-    @Lazy
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+
+    public TicketMapper(@Lazy UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
 
     public TicketDto toDto(Ticket ticket){
         TicketDto ticketDto = new TicketDto();

@@ -5,7 +5,7 @@ import com.soluciones.ticketgestor.models.TicketPriority;
 import com.soluciones.ticketgestor.models.TicketState;
 import com.soluciones.ticketgestor.models.Ticket;
 import com.soluciones.ticketgestor.repositories.TicketRepository;
-import com.soluciones.ticketgestor.services.TicketServiceImp;
+import com.soluciones.ticketgestor.services.TicketServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TicketServiceImpTest {
+class TicketServiceImplTest {
 
     @Mock
     private TicketRepository ticketRepository;
 
     @InjectMocks
-    private TicketServiceImp ticketService; // Asegúrate de que el nombre coincida con tu clase real
+    private TicketServiceImpl ticketService; // Asegúrate de que el nombre coincida con tu clase real
 
     @Test
     void createTicket_ShouldSaveTicket_WhenTkNumberDoesNotExist() {

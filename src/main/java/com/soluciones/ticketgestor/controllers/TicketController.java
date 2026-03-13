@@ -6,7 +6,7 @@ import com.soluciones.ticketgestor.dtos.TicketDto;
 import com.soluciones.ticketgestor.mappers.TicketMapper;
 import com.soluciones.ticketgestor.models.Ticket;
 import com.soluciones.ticketgestor.models.User;
-import com.soluciones.ticketgestor.services.UserServiceImpl;
+import com.soluciones.ticketgestor.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,14 +34,15 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class TicketController {
 
-    @Autowired
-    private TicketService ticketService;
+    private final TicketService ticketService;
+    private final TicketMapper ticketMapper;
+    private final UserService userService;
 
-    @Autowired
-    private TicketMapper ticketMapper;
-
-    @Autowired
-    private UserServiceImpl userServiceImpl;
+    public TicketController(TicketService ticketService, TicketMapper ticketMapper, UserService userService) {
+        this.ticketService = ticketService;
+        this.ticketMapper = ticketMapper;
+        this.userService = userService;
+    }
 
     @Operation(
             summary = "Obtener todos los tickets.",
@@ -211,7 +211,7 @@ public class TicketController {
             @RequestBody SaveTicketDto saveTicketDto,
             @AuthenticationPrincipal UserDetails userDetails){
 
-        User user = userServiceImpl.getUserByEmail(userDetails.getUsername());
+        User user = userService.getUserByEmail(userDetails.getUsername());
         Ticket ticketEntity = ticketMapper.toEntity(saveTicketDto, user);
 
         Ticket savedTicket = ticketService.createTicket(ticketEntity);

@@ -1,7 +1,5 @@
 package com.soluciones.ticketgestor.security;
 
-import com.soluciones.ticketgestor.models.User;
-import com.soluciones.ticketgestor.services.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

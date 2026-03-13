@@ -5,7 +5,6 @@ import com.soluciones.ticketgestor.exceptions.ResourceIncompleteException;
 import com.soluciones.ticketgestor.exceptions.ResourceNotFoundException;
 import com.soluciones.ticketgestor.models.Ticket;
 import com.soluciones.ticketgestor.repositories.TicketRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +12,13 @@ import java.util.List;
 
 @Service
 @Primary
-public class TicketServiceImp implements TicketService{
+public class TicketServiceImpl implements TicketService{
 
-    @Autowired
-    private TicketRepository ticketRepository;
+    private final TicketRepository ticketRepository;
+
+    public TicketServiceImpl(TicketRepository ticketRepository) {
+        this.ticketRepository = ticketRepository;
+    }
 
     public List<Ticket> getTicketList() {
         return ticketRepository.findAll();

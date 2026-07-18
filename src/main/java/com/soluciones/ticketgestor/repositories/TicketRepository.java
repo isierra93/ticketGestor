@@ -11,4 +11,5 @@ import java.util.Optional;
 @Primary
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     boolean existsByTkNumber(Long tkNumber);
+    boolean existsByTkNumberAndIdNot(Long tkNumber, Long id);
 }

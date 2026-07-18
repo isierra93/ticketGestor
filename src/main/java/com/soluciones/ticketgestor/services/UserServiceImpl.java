@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     public User convertToEntity(UserDto userDto){
         User user = userMapper.toEntity(userDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(UserRole.ADMIN);
+        user.setRole(UserRole.CLIENT);
         return user;
     }
 

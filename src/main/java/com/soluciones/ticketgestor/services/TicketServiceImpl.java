@@ -50,7 +50,7 @@ public class TicketServiceImpl implements TicketService{
     public Ticket updateTicket(Ticket ticket){
         this.validateNulls(ticket);
 
-        if (ticketRepository.existsByTkNumber(ticket.getTkNumber())){
+        if (ticketRepository.existsByTkNumberAndIdNot(ticket.getTkNumber(), ticket.getId())){
             throw new ResourceAlreadyExistsException("El Tk Number: " + ticket.getTkNumber() +" ya existe.");
         }
 

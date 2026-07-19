@@ -54,7 +54,7 @@ Models (`models/`) use manual getters/setters — no Lombok.
 **Key domain rules:**
 - `tkNumber` is the business ticket number (unique constraint); `id` is the DB primary key.
 - `TicketState` defaults to `ABIERTO` and `createdDate` defaults to `LocalDateTime.now()` on the entity.
-- `updateTicket` in `TicketServiceImpl` also blocks duplicate `tkNumber`, so changing `tkNumber` on an existing ticket will throw `ResourceAlreadyExistsException`.
+- `updateTicket` in `TicketServiceImpl` enforces `tkNumber` uniqueness against *other* tickets via `existsByTkNumberAndIdNot`, so re-saving a ticket with its own current `tkNumber` is allowed; reusing another ticket's `tkNumber` throws `ResourceAlreadyExistsException`.
 
 **Exception handling:**  
 All custom exceptions (`ResourceNotFoundException`, `ResourceAlreadyExistsException`, `ResourceIncompleteException`, `InvalidDataFormatException`) are caught and converted to `ErrorDto` responses by `GlobalExceptionHandler`.

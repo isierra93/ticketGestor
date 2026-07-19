@@ -4,6 +4,7 @@ import com.soluciones.ticketgestor.exceptions.ResourceAlreadyExistsException;
 import com.soluciones.ticketgestor.exceptions.ResourceIncompleteException;
 import com.soluciones.ticketgestor.exceptions.ResourceNotFoundException;
 import com.soluciones.ticketgestor.models.Ticket;
+import com.soluciones.ticketgestor.models.TicketState;
 import com.soluciones.ticketgestor.repositories.TicketRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,13 @@ public class TicketServiceImpl implements TicketService{
         if (ticketRepository.existsByTkNumber(ticket.getTkNumber())){
             throw new ResourceAlreadyExistsException("El Tk Number: " + ticket.getTkNumber() +" ya existe.");
         }
+        return ticketRepository.save(ticket);
+    }
+
+    @Override
+    public Ticket updateTicketState(Long id, TicketState newState) {
+        Ticket ticket = getTicketById(id);
+        ticket.setState(newState);
         return ticketRepository.save(ticket);
     }
 

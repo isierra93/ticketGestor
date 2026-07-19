@@ -1,6 +1,6 @@
 # Spec — CoreDesk API
 
-> Documentación del estado actual del código. Última revisión: 2026-07-17.
+> Documentación del estado actual del código. Última revisión: 2026-07-18.
 
 ---
 
@@ -125,7 +125,7 @@ Devuelve un ticket por su `id` (PK de base de datos).
 
 #### `POST /ticket`
 
-Crea un nuevo ticket. El ticket queda asociado al usuario autenticado (extraído del JWT vía `@AuthenticationPrincipal`).
+Crea un nuevo ticket. El ticket queda asociado al usuario autenticado (extraído del JWT vía `@AuthenticationPrincipal`). **Requiere rol `ROLE_CLIENT` o `ROLE_ADMIN`** — los agentes (`ROLE_AGENT`) no pueden crear tickets.
 
 **Request body (`SaveTicketDto`):**
 ```json
@@ -146,13 +146,14 @@ El `state` no se acepta en el body de creación — siempre nace como `ABIERTO`.
 |--------|------|
 | 201    | Creado correctamente |
 | 400    | Algún campo requerido es nulo, o JSON malformado, o enum inválido |
+| 403    | El usuario tiene `ROLE_AGENT` |
 | 409    | Ya existe un ticket con ese `tkNumber` |
 
 ---
 
 #### `PUT /ticket/{id}`
 
-Actualiza los campos de un ticket existente. Localiza el ticket por `id` (PK), luego sobreescribe los campos con el DTO.
+Actualiza todos los campos de un ticket existente. Localiza el ticket por `id` (PK), luego sobreescribe los campos con el DTO. **Requiere rol `ROLE_CLIENT` o `ROLE_ADMIN`** — los agentes deben usar `PATCH /ticket/{id}/state` para cambiar el estado.
 
 **Request body (`TicketDto`):**
 ```json
@@ -172,8 +173,26 @@ Los campos `createdDate` y `user` no se actualizan (no están en `updateTicketFr
 |--------|------|
 | 200    | Actualizado; devuelve `TicketDto` |
 | 400    | Campo requerido nulo, o JSON malformado |
+| 403    | El usuario tiene `ROLE_AGENT` |
 | 404    | No existe ticket con ese `id` |
 | 409    | El `tkNumber` enviado ya existe en otro ticket |
+
+---
+
+#### `PATCH /ticket/{id}/state`
+
+Actualiza **únicamente el estado** de un ticket. Disponible para todos los roles autenticados, pero con restricción para agentes: **`ROLE_AGENT` solo puede establecer `EN_CURSO` o `CERRADO`**.
+
+**Request body (`TicketStateUpdateDto`):**
+```json
+{ "state": "EN_CURSO" }
+```
+
+| Código | Caso |
+|--------|------|
+| 200    | Estado actualizado; devuelve `TicketDto` |
+| 400    | `ROLE_AGENT` intentó establecer un estado distinto de `EN_CURSO` o `CERRADO` |
+| 404    | No existe ticket con ese `id` |
 
 ---
 
@@ -192,14 +211,15 @@ Elimina un ticket por su `id`. **Requiere rol `ROLE_ADMIN`.**
 
 ## DTOs
 
-| DTO             | Campos                                                                 | Usado en                  |
-|-----------------|------------------------------------------------------------------------|---------------------------|
-| `UserDto`       | email, password                                                        | body de /auth/register y /auth/login |
-| `TokenDto`      | token                                                                  | respuesta de /auth/login  |
-| `SaveTicketDto` | tkNumber, site, priority, description, type                            | body de POST /ticket      |
-| `TicketDto`     | tkNumber, site, priority, createdDate, description, state, type, userOwnerDto | respuesta de ticket; body de PUT /ticket |
-| `UserOwnerDto`  | email                                                                  | anidado en TicketDto      |
-| `ErrorDto`      | message, error, status, timestamp                                      | todas las respuestas de error |
+| DTO                    | Campos                                                                 | Usado en                  |
+|------------------------|------------------------------------------------------------------------|---------------------------|
+| `UserDto`              | email, password                                                        | body de /auth/register y /auth/login |
+| `TokenDto`             | token                                                                  | respuesta de /auth/login  |
+| `SaveTicketDto`        | tkNumber, site, priority, description, type                            | body de POST /ticket      |
+| `TicketDto`            | tkNumber, site, priority, createdDate, description, state, type, userOwnerDto | respuesta de ticket; body de PUT /ticket |
+| `TicketStateUpdateDto` | state                                                                  | body de PATCH /ticket/{id}/state |
+| `UserOwnerDto`         | email                                                                  | anidado en TicketDto      |
+| `ErrorDto`             | message, error, status, timestamp                                      | todas las respuestas de error |
 
 ---
 
@@ -226,6 +246,19 @@ Elimina un ticket por su `id`. **Requiere rol `ROLE_ADMIN`.**
 1. Mismas validaciones de nulos que en la creación, incluyendo `state`.
 2. `tkNumber` debe ser único entre los demás tickets (se excluye el propio ticket del chequeo, por lo que enviar el mismo `tkNumber` actual es válido).
 3. Los campos `createdDate` y `user` no se modifican en ningún update.
+
+### Permisos por rol sobre tickets
+
+| Acción                          | CLIENT | AGENT                          | ADMIN |
+|---------------------------------|--------|--------------------------------|-------|
+| GET /ticket                     | ✅     | ✅                             | ✅    |
+| GET /ticket/{id}                | ✅     | ✅                             | ✅    |
+| POST /ticket                    | ✅     | ❌ (403)                       | ✅    |
+| PUT /ticket/{id}                | ✅     | ❌ (403)                       | ✅    |
+| PATCH /ticket/{id}/state        | ✅ (cualquier estado) | ✅ (solo EN_CURSO / CERRADO) | ✅ |
+| DELETE /ticket/{id}             | ❌ (403) | ❌ (403)                     | ✅    |
+
+La restricción de estados para `ROLE_AGENT` en el PATCH se valida en el controller: si el estado enviado no es `EN_CURSO` ni `CERRADO` devuelve `InvalidDataFormatException` → 400.
 
 ### Eliminación de ticket
 
@@ -268,7 +301,9 @@ HTTP Request
 |---------------------------------|-----------|
 | `/auth/login`, `/auth/register` | Público   |
 | `/swagger-ui/**`, `/v3/api-docs/**`, `/webjars/**` | Público |
-| Todo lo demás                   | JWT válido requerido |
+| `GET /ticket`, `GET /ticket/{id}` | JWT válido (cualquier rol) |
+| `POST /ticket`, `PUT /ticket/{id}` | JWT válido + `ROLE_CLIENT` o `ROLE_ADMIN` |
+| `PATCH /ticket/{id}/state`      | JWT válido (cualquier rol; validación de estado en controller para `ROLE_AGENT`) |
 | `DELETE /ticket/{id}`           | JWT válido + `ROLE_ADMIN` |
 
 **CORS:** orígenes `*`, métodos GET/POST/PUT/DELETE/OPTIONS, headers `Authorization` y `Content-Type`.
@@ -278,7 +313,7 @@ HTTP Request
 ```
 com.soluciones.ticketgestor
 ├── controllers/     AuthController, TicketController
-├── dtos/            ErrorDto, SaveTicketDto, TicketDto, TokenDto, UserDto, UserOwnerDto
+├── dtos/            ErrorDto, SaveTicketDto, TicketDto, TicketStateUpdateDto, TokenDto, UserDto, UserOwnerDto
 ├── exceptions/      GlobalExceptionHandler + 4 excepciones custom (Runtime)
 ├── mappers/         TicketMapper, UserMapper  (conversión manual, sin MapStruct)
 ├── models/          Ticket, User + enums TicketPriority, TicketState, UserRole

@@ -36,6 +36,9 @@ build/
 ### VS Code ###
 .vscode/
 
+### macOS ###
+.DS_Store
+
 docker-compose.yml
 docker-compose.prod.yml
 Dockerfile.prod

@@ -3,8 +3,11 @@ package com.soluciones.ticketgestor.controllers;
 import com.soluciones.ticketgestor.dtos.ErrorDto;
 import com.soluciones.ticketgestor.dtos.SaveTicketDto;
 import com.soluciones.ticketgestor.dtos.TicketDto;
+import com.soluciones.ticketgestor.dtos.TicketStateUpdateDto;
+import com.soluciones.ticketgestor.exceptions.InvalidDataFormatException;
 import com.soluciones.ticketgestor.mappers.TicketMapper;
 import com.soluciones.ticketgestor.models.Ticket;
+import com.soluciones.ticketgestor.models.TicketState;
 import com.soluciones.ticketgestor.models.User;
 import com.soluciones.ticketgestor.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -207,6 +210,7 @@ public class TicketController {
             }
     )
     @PostMapping
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     public ResponseEntity<TicketDto> postTicket(
             @RequestBody SaveTicketDto saveTicketDto,
             @AuthenticationPrincipal UserDetails userDetails){
@@ -320,11 +324,72 @@ public class TicketController {
             }
     )
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     public ResponseEntity<TicketDto> putTicket(@PathVariable Long id, @RequestBody TicketDto dto){
         Ticket existingTicket = ticketService.getTicketById(id);
         ticketMapper.updateTicketFromDto(dto, existingTicket);
         Ticket savedTicket = ticketService.updateTicket(existingTicket);
         return ResponseEntity.ok(ticketMapper.toDto(savedTicket));
+    }
+
+    @Operation(
+            summary = "Cambiar el estado de un ticket.",
+            description = "Actualiza únicamente el estado de un ticket. Los agentes solo pueden establecer EN_CURSO o CERRADO."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Operación exitosa. Estado del ticket actualizado correctamente.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = TicketDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Estado inválido para el rol del usuario.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                      "message": "Los agentes solo pueden establecer el estado EN_CURSO o CERRADO.",
+                                                      "error": "Bad Request",
+                                                      "status": 400,
+                                                      "timestamp": "2026-03-01T16:32:46.097Z"
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Operación fallida. Ticket no encontrado.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class)
+                            )
+                    )
+            }
+    )
+    @PatchMapping("/{id}/state")
+    @PreAuthorize("hasAnyRole('CLIENT', 'AGENT', 'ADMIN')")
+    public ResponseEntity<TicketDto> patchTicketState(
+            @PathVariable Long id,
+            @RequestBody TicketStateUpdateDto dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        boolean isAgent = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_AGENT"));
+
+        if (isAgent && dto.getState() != TicketState.EN_CURSO && dto.getState() != TicketState.CERRADO) {
+            throw new InvalidDataFormatException("Los agentes solo pueden establecer el estado EN_CURSO o CERRADO.");
+        }
+
+        Ticket updated = ticketService.updateTicketState(id, dto.getState());
+        return ResponseEntity.ok(ticketMapper.toDto(updated));
     }
 
     @Operation(

@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Spec (SDD)
+
+This project follows Spec-Driven Development. **At the start of every session, read `spec.md` before making any changes.**
+
 ## Commands
 
 ```bash

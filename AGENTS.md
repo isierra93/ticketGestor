@@ -53,7 +53,12 @@ Set before running the app — `application.properties` uses `${VAR}` placeholde
 
 ## Lombok
 
-Lombok 1.18.42 is on the classpath. `Ticket` uses class-level `@Builder @Getter @Setter @NoArgsConstructor @Accessors(prefix = "ticket")` — the `@Accessors` strips the `ticket` prefix from `ticketPriority`/`ticketState` so generated accessors are `getPriority()/setPriority()/getState()/setState()` (matching DTOs and call sites). Defaults (`createdDate = LocalDateTime.now()`, `ticketState = ABIERTO`) live on the entity, not in DTOs. `User` and all DTOs use manual getters/setters — no Lombok on them.
+Lombok 1.18.42 is on the classpath. Both entities use Lombok with `@Accessors` for prefix-stripping accessors:
+
+- `Ticket`: `@Builder @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Accessors(prefix = {"ticket", ""})` — `ticketPriority`/`ticketState` generate `getPriority()/setPriority()/getState()/setState()` (matching DTOs and call sites). Defaults (`createdDate = LocalDateTime.now()`, `ticketState = ABIERTO`) live on the entity fields with `@Builder.Default`.
+- `User`: same annotations with `@Accessors(prefix = {"user", ""})` — `userRole` generates `getRole()/setRole()` (matching `UserServiceImpl`/`UserDetailsServiceImpl` call sites).
+
+All DTOs use manual getters/setters — no Lombok on them.
 
 ## Tests
 

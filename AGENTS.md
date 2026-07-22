@@ -10,6 +10,25 @@ This project follows **Spec-Driven Development (SDD)**. The single source of tru
 - When `spec.md` and the code disagree, trust the code and update the spec.
 - This file (`AGENTS.md`) only adds what isn't already obvious in `spec.md` — non-obvious commands, gotchas, conventions.
 
+## Spec workflow
+
+Cómo decidir qué tocar antes, durante y después de un cambio:
+
+| Tipo de cambio | `spec.md` | `AGENTS.md` |
+|---|---|---|
+| **Dominio/regla de negocio** (nuevo endpoint, campo, regla, enum, validación, código HTTP) | **Sí**, antes o en el mismo commit | Solo si el cambio toca una convención no obvia |
+| **Refactor puro** (Lombok, rename interno, extraer helper, mover código) | No | Sí, si introduce o cambia una convención del repo |
+| **Build/infra** (pom, Dockerfile, wrapper, CI) | No | Sí, si cambia cómo se corre o testea |
+| **Docs** (este archivo, `spec.md`, README) | Bumpear `> Última revisión:` si hubo cambio de dominio | Bumpear fecha del propio doc si hubo cambio de convención |
+
+Reglas:
+
+- **Releer `spec.md` antes de cada cambio de dominio.** Si lo que vas a hacer contradice una sección, actualizala primero o en el mismo commit — nunca después.
+- **Commiteá código + spec juntos** para cambios de dominio. Nunca dejar el spec stale entremedio.
+- **El spec documenta el "qué"** (entidades, endpoints, reglas, contratos). **AGENTS.md documenta el "cómo"** (comandos, convenciones, gotchas). No mezcles.
+- **Bumpear `> Última revisión: YYYY-MM-DD`** solo cuando el commit cambió el spec. No en cada commit.
+- Si dudás, **escribilo en el spec**. El costo de una sección de más es bajo; el costo de un spec desactualizado es que el próximo agente (vos en 2 meses) toma decisiones con info incorrecta.
+
 ## Quick commands
 
 ```bash

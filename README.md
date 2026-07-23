@@ -19,30 +19,23 @@ API REST para la gestión de tickets de soporte, desarrollada con Spring Boot.
 
 ## Configuración
 
-### 1. Base de datos
-
-Inicia el contenedor de MySQL:
+Levanta la base de datos y ejecuta la aplicación:
 
 ```bash
-docker-compose up -d
-```
-
-Esto creará una instancia de MySQL con:
-- **Base de datos:** `db-ticket-gestor`
-- **Puerto:** `3306`
-- **Usuario:** `root`
-- **Contraseña:** `1234`
-
-### 2. Ejecutar la aplicación
-
-```bash
-./mvnw spring-boot:run
+docker compose up -d        # MySQL en localhost:3306
+./mvnw spring-boot:run      # app en localhost:8080/api/v1
 ```
 
 En Windows:
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
+
+La instancia de MySQL viene con:
+- **Base de datos:** `db-ticket-gestor`
+- **Puerto:** `3306`
+- **Usuario:** `root`
+- **Contraseña:** `1234`
 
 ## Endpoints
 

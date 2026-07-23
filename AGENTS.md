@@ -32,21 +32,32 @@ Reglas:
 ## Quick commands
 
 ```bash
-# Local MySQL (see "docker-compose gotcha" below)
-docker-compose up -d
+# Levantar MySQL local (único servicio en compose — la app corre con mvnw)
+docker compose up -d
 
-# Run app (needs all 5 env vars from application.properties)
+# Ver logs
+docker compose logs -f mysql
+
+# Bajar MySQL (conservando datos)
+docker compose down
+
+# Bajar y BORRAR los datos de la DB
+docker compose down -v
+
+# Correr la app localmente (necesita las 5 env vars)
 ./mvnw spring-boot:run
 
 # Build, skip tests
 ./mvnw clean package -DskipTests
 
-# Unit tests only — TicketServiceImplTest is a pure Mockito test
+# Unit tests (sin DB)
 ./mvnw test -Dtest=TicketServiceImplTest
 
-# All tests
+# Todos los tests
 ./mvnw test
 ```
+
+MySQL defaults: `localhost:3306`, DB `db-ticket-gestor`, user `root`, pass `1234`. Para sobreescribirlos sin editar el compose, crear un `.env` local (ya está en `.gitignore`) con `MYSQL_ROOT_PASSWORD=...`, `MYSQL_DATABASE=...`, etc.
 
 ## Environment variables (all required, no defaults)
 
@@ -59,10 +70,6 @@ Set before running the app — `application.properties` uses `${VAR}` placeholde
 | `DB_PASSWORD` | DB password |
 | `JWT_SECRET_KEY` | HS256 signing secret, **must be ≥32 chars** |
 | `JWT_EXPIRATION` | Token TTL in ms |
-
-## docker-compose gotcha
-
-`docker-compose.yml` is listed in `.gitignore` (line 42) and **not committed**. You must create it locally before `./mvnw spring-boot:run`. The README/CLAUDE.md documented defaults are: MySQL on `localhost:3306`, DB `db-ticket-gestor`, user `root`, pass `1234`.
 
 `Dockerfile` is committed (multi-stage Maven + JRE Alpine, exposes 8080).
 
@@ -101,7 +108,7 @@ All DTOs use manual getters/setters — no Lombok on them.
 
 ## What this repo does NOT have
 
-- No `docker-compose.yml` (gitignored — see above).
+- No `Dockerfile.prod` / `docker-compose.prod.yml` (gitignored — solo se usa `Dockerfile` + `docker-compose.yml`).
 - No linter or formatter (no Spotless, Checkstyle, SpotBugs).
 - No CI workflow (no `.github/`).
 - No SpringDoc/Swagger annotations on DTOs beyond controllers (controllers use `@Operation`/`@ApiResponses` extensively).

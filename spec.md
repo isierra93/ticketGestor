@@ -1,6 +1,6 @@
 # Spec — CoreDesk API
 
-> Documentación del estado actual del código. Última revisión: 2026-07-18.
+> Documentación del estado actual del código. Última revisión: 2026-07-23.
 
 ---
 
@@ -50,6 +50,18 @@ API REST para la gestión de tickets de soporte (issue tracker). Nombre comercia
 **Enum `TicketPriority`:** `URGENTE`, `ALTA`, `MEDIA`, `BAJA`
 
 **Enum `TicketState`:** `ABIERTO`, `ASIGNADO`, `EN_CURSO`, `CERRADO`
+
+---
+
+### `Comentario` — tabla `comentarios`
+
+| Campo        | Tipo           | Restricciones / Defaults                              |
+|--------------|----------------|-------------------------------------------------------|
+| `id`         | Long           | PK, auto-increment                                   |
+| `createdAt`  | LocalDateTime  | Default: `LocalDateTime.now()` al instanciar la entidad |
+| `comentario` | String         | Requerido, no nulo, no vacío                         |
+| `user`       | `User`         | FK `user_id` → `usuarios.id` (`@ManyToOne`), NOT NULL |
+| `ticket`     | `Ticket`       | FK `ticket_id` → `tickets.id` (`@ManyToOne`), NOT NULL |
 
 ---
 
@@ -196,6 +208,40 @@ Actualiza **únicamente el estado** de un ticket. Disponible para todos los role
 
 ---
 
+#### `GET /ticket/{ticketId}/comentarios`
+
+Devuelve todos los comentarios de un ticket, ordenados por `createdAt` ASC.
+
+**Respuesta 200:** array de `ComentarioDto`.
+
+| Código | Caso |
+|--------|------|
+| 200    | Lista de comentarios obtenida |
+| 401    | Sin JWT válido |
+| 404    | No existe ticket con ese `ticketId` |
+
+---
+
+#### `POST /ticket/{ticketId}/comentarios`
+
+Agrega un comentario al ticket. El autor se toma del JWT (`@AuthenticationPrincipal`). Disponible para cualquier rol autenticado (incluso `ROLE_AGENT`).
+
+**Request body (`SaveComentarioDto`):**
+```json
+{ "comentario": "Revisé el equipo, falta el repuesto X." }
+```
+
+**Respuesta 201:** `ComentarioDto` en el body + header `Location: /ticket/{ticketId}/comentarios/{id}`.
+
+| Código | Caso |
+|--------|------|
+| 201    | Comentario creado |
+| 400    | `comentario` nulo o vacío, o JSON malformado |
+| 401    | Sin JWT válido |
+| 404    | No existe ticket con ese `ticketId` |
+
+---
+
 #### `DELETE /ticket/{id}`
 
 Elimina un ticket por su `id`. **Requiere rol `ROLE_ADMIN`.**
@@ -218,7 +264,9 @@ Elimina un ticket por su `id`. **Requiere rol `ROLE_ADMIN`.**
 | `SaveTicketDto`        | tkNumber, site, priority, description, type                            | body de POST /ticket      |
 | `TicketDto`            | tkNumber, site, priority, createdDate, description, state, type, userOwnerDto | respuesta de ticket; body de PUT /ticket |
 | `TicketStateUpdateDto` | state                                                                  | body de PATCH /ticket/{id}/state |
-| `UserOwnerDto`         | email                                                                  | anidado en TicketDto      |
+| `SaveComentarioDto`    | comentario                                                             | body de POST /ticket/{id}/comentarios |
+| `ComentarioDto`        | id, createdAt, comentario, userOwnerDto                                | respuesta de comentario    |
+| `UserOwnerDto`         | email                                                                  | anidado en TicketDto y ComentarioDto |
 | `ErrorDto`             | message, error, status, timestamp                                      | todas las respuestas de error |
 
 ---
@@ -256,6 +304,8 @@ Elimina un ticket por su `id`. **Requiere rol `ROLE_ADMIN`.**
 | POST /ticket                    | ✅     | ❌ (403)                       | ✅    |
 | PUT /ticket/{id}                | ✅     | ❌ (403)                       | ✅    |
 | PATCH /ticket/{id}/state        | ✅ (cualquier estado) | ✅ (solo EN_CURSO / CERRADO) | ✅ |
+| GET /ticket/{id}/comentarios    | ✅     | ✅                           | ✅    |
+| POST /ticket/{id}/comentarios   | ✅     | ✅                           | ✅    |
 | DELETE /ticket/{id}             | ❌ (403) | ❌ (403)                     | ✅    |
 
 La restricción de estados para `ROLE_AGENT` en el PATCH se valida en el controller: si el estado enviado no es `EN_CURSO` ni `CERRADO` devuelve `InvalidDataFormatException` → 400.
@@ -304,6 +354,8 @@ HTTP Request
 | `GET /ticket`, `GET /ticket/{id}` | JWT válido (cualquier rol) |
 | `POST /ticket`, `PUT /ticket/{id}` | JWT válido + `ROLE_CLIENT` o `ROLE_ADMIN` |
 | `PATCH /ticket/{id}/state`      | JWT válido (cualquier rol; validación de estado en controller para `ROLE_AGENT`) |
+| `GET /ticket/{id}/comentarios`  | JWT válido (cualquier rol) |
+| `POST /ticket/{id}/comentarios` | JWT válido (cualquier rol) |
 | `DELETE /ticket/{id}`           | JWT válido + `ROLE_ADMIN` |
 
 **CORS:** orígenes `*`, métodos GET/POST/PUT/DELETE/OPTIONS, headers `Authorization` y `Content-Type`.
@@ -313,14 +365,15 @@ HTTP Request
 ```
 com.soluciones.ticketgestor
 ├── controllers/     AuthController, TicketController
-├── dtos/            ErrorDto, SaveTicketDto, TicketDto, TicketStateUpdateDto, TokenDto, UserDto, UserOwnerDto
+├── dtos/            ComentarioDto, ErrorDto, SaveComentarioDto, SaveTicketDto, TicketDto,
+│                    TicketStateUpdateDto, TokenDto, UserDto, UserOwnerDto
 ├── exceptions/      GlobalExceptionHandler + 4 excepciones custom (Runtime)
-├── mappers/         TicketMapper, UserMapper  (conversión manual, sin MapStruct)
-├── models/          Ticket, User + enums TicketPriority, TicketState, UserRole
-├── repositories/    TicketRepository, UserRepository  (Spring Data JPA)
+├── mappers/         ComentarioMapper, TicketMapper, UserMapper  (conversión manual, sin MapStruct)
+├── models/          Comentario, Ticket, User + enums TicketPriority, TicketState, UserRole
+├── repositories/    ComentarioRepository, TicketRepository, UserRepository  (Spring Data JPA)
 ├── security/        JwtAuthenticationFilter, JwtAuthenticationEntryPoint, JwtUtils,
 │                    SecurityConfig, OpenApiConfig
-└── services/        TicketService/Impl, UserService/Impl, UserDetailsServiceImpl
+└── services/        ComentarioService/Impl, TicketService/Impl, UserService/Impl, UserDetailsServiceImpl
 ```
 
 Cada servicio tiene interfaz + implementación marcada `@Primary`. `UserDetailsServiceImpl` implementa `UserDetailsService` de Spring Security (el username es el email).

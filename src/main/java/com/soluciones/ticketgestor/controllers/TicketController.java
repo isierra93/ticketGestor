@@ -1,14 +1,19 @@
 package com.soluciones.ticketgestor.controllers;
 
+import com.soluciones.ticketgestor.dtos.ComentarioDto;
 import com.soluciones.ticketgestor.dtos.ErrorDto;
+import com.soluciones.ticketgestor.dtos.SaveComentarioDto;
 import com.soluciones.ticketgestor.dtos.SaveTicketDto;
 import com.soluciones.ticketgestor.dtos.TicketDto;
 import com.soluciones.ticketgestor.dtos.TicketStateUpdateDto;
 import com.soluciones.ticketgestor.exceptions.InvalidDataFormatException;
+import com.soluciones.ticketgestor.mappers.ComentarioMapper;
 import com.soluciones.ticketgestor.mappers.TicketMapper;
+import com.soluciones.ticketgestor.models.Comentario;
 import com.soluciones.ticketgestor.models.Ticket;
 import com.soluciones.ticketgestor.models.TicketState;
 import com.soluciones.ticketgestor.models.User;
+import com.soluciones.ticketgestor.services.ComentarioService;
 import com.soluciones.ticketgestor.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,11 +45,16 @@ public class TicketController {
     private final TicketService ticketService;
     private final TicketMapper ticketMapper;
     private final UserService userService;
+    private final ComentarioService comentarioService;
+    private final ComentarioMapper comentarioMapper;
 
-    public TicketController(TicketService ticketService, TicketMapper ticketMapper, UserService userService) {
+    public TicketController(TicketService ticketService, TicketMapper ticketMapper, UserService userService,
+                            ComentarioService comentarioService, ComentarioMapper comentarioMapper) {
         this.ticketService = ticketService;
         this.ticketMapper = ticketMapper;
         this.userService = userService;
+        this.comentarioService = comentarioService;
+        this.comentarioMapper = comentarioMapper;
     }
 
     @Operation(
@@ -390,6 +400,166 @@ public class TicketController {
 
         Ticket updated = ticketService.updateTicketState(id, dto.getState());
         return ResponseEntity.ok(ticketMapper.toDto(updated));
+    }
+
+    @Operation(
+            summary = "Obtener comentarios de un ticket.",
+            description = "Devuelve todos los comentarios de un ticket, ordenados por createdAt ASC."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Operación exitosa. Lista de comentarios obtenida correctamente.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = ComentarioDto.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "No autorizado. Se requiere un token JWT válido para realizar esta acción.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                      "message": "No autorizado. Se requiere un token JWT válido para acceder a este recurso.",
+                                                      "error": "Unauthorized",
+                                                      "status": 401,
+                                                      "timestamp": "2026-03-01T16:32:46.097Z"
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Operación fallida. Ticket no encontrado.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                      "message": "El TK ID: 9999 no existe.",
+                                                      "error": "Not Found",
+                                                      "status": 404,
+                                                      "timestamp": "2026-02-28T16:32:46.097Z"
+                                                    }
+                                                    """
+                                    )
+                            )
+                    )
+            }
+    )
+    @GetMapping("/{ticketId}/comentarios")
+    public ResponseEntity<List<ComentarioDto>> getComentariosByTicketId(
+            @PathVariable
+            @Parameter(description = "El ID del ticket del cual obtener los comentarios.")
+            Long ticketId) {
+
+        List<ComentarioDto> comentarios = comentarioService.getComentariosByTicketId(ticketId)
+                .stream()
+                .map(comentarioMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(comentarios);
+    }
+
+    @Operation(
+            summary = "Agregar un comentario.",
+            description = "Agrega un comentario al ticket. El autor se toma del JWT del usuario autenticado."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "Operación exitosa. Comentario creado correctamente.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ComentarioDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Comentario nulo o vacío.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                      "message": "Campo incompleto: Comentario",
+                                                      "error": "Bad Request",
+                                                      "status": 400,
+                                                      "timestamp": "2026-02-28T16:32:46.097Z"
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "No autorizado. Se requiere un token JWT válido para realizar esta acción.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                      "message": "No autorizado. Se requiere un token JWT válido para acceder a este recurso.",
+                                                      "error": "Unauthorized",
+                                                      "status": 401,
+                                                      "timestamp": "2026-03-01T16:32:46.097Z"
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Operación fallida. Ticket no encontrado.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class),
+                                    examples = @ExampleObject(
+                                            value = """
+                                                    {
+                                                      "message": "El TK ID: 9999 no existe.",
+                                                      "error": "Not Found",
+                                                      "status": 404,
+                                                      "timestamp": "2026-02-28T16:32:46.097Z"
+                                                    }
+                                                    """
+                                    )
+                            )
+                    )
+            }
+    )
+    @PostMapping("/{ticketId}/comentarios")
+    public ResponseEntity<ComentarioDto> postComentario(
+            @PathVariable
+            @Parameter(description = "El ID del ticket al cual agregar el comentario.")
+            Long ticketId,
+            @RequestBody SaveComentarioDto saveComentarioDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        User user = userService.getUserByEmail(userDetails.getUsername());
+        Ticket ticket = ticketService.getTicketById(ticketId);
+
+        Comentario comentarioEntity = comentarioMapper.toEntity(saveComentarioDto, user, ticket);
+        Comentario savedComentario = comentarioService.createComentario(ticketId, comentarioEntity);
+
+        ComentarioDto comentarioDto = comentarioMapper.toDto(savedComentario);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedComentario.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(comentarioDto);
     }
 
     @Operation(

@@ -82,8 +82,8 @@ public class TicketServiceImpl implements TicketService{
         if (ticket.getState() == null){
             throw new ResourceIncompleteException("Campo incompleto: Estado.");
         }
-        if (ticket.getType() == null){
-            throw new ResourceIncompleteException("Campo incompleto: Tipo");
+        if (ticket.getCategory() == null){
+            throw new ResourceIncompleteException("Campo incompleto: Categoria");
         }
     }
 

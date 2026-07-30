@@ -34,7 +34,8 @@ public class Ticket {
     @Builder.Default
     private TicketState ticketState = TicketState.ABIERTO;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private TicketCategory ticketCategory;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

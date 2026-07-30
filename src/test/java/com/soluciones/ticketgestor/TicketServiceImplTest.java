@@ -1,6 +1,7 @@
 package com.soluciones.ticketgestor;
 
 import com.soluciones.ticketgestor.exceptions.ResourceAlreadyExistsException;
+import com.soluciones.ticketgestor.models.TicketCategory;
 import com.soluciones.ticketgestor.models.TicketPriority;
 import com.soluciones.ticketgestor.models.TicketState;
 import com.soluciones.ticketgestor.models.Ticket;
@@ -32,7 +33,7 @@ class TicketServiceImplTest {
         newTicket.setSite("Sucursal Test");
         newTicket.setPriority(TicketPriority.ALTA);
         newTicket.setDescription("Descripción de prueba");
-        newTicket.setType("Mantenimiento");
+        newTicket.setCategory(TicketCategory.LUMINARIAS);
         // State y Date ya se ponen solos por defecto ;)
 
         // Entrenamos al Mock: "No existe este número, puedes guardar"
@@ -56,7 +57,7 @@ class TicketServiceImplTest {
         duplicateTicket.setSite("Sucursal A");
         duplicateTicket.setPriority(TicketPriority.MEDIA);
         duplicateTicket.setDescription("Ticket duplicado");
-        duplicateTicket.setType("Soporte");
+        duplicateTicket.setCategory(TicketCategory.GRUPO_ELECTROGENO);
         //State y Date son automáticos
 
         //Entrenamos al Mock: "Si, ese numero ya existe!"

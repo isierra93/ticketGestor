@@ -1,5 +1,6 @@
 package com.soluciones.ticketgestor.dtos;
 
+import com.soluciones.ticketgestor.models.TicketCategory;
 import com.soluciones.ticketgestor.models.TicketPriority;
 import com.soluciones.ticketgestor.models.TicketState;
 
@@ -12,21 +13,21 @@ public class TicketDto {
     private LocalDateTime createdDate;
     private String description;
     private TicketState ticketState;
-    private String type;
+    private TicketCategory category;
     private UserOwnerDto userOwnerDto;
 
     public TicketDto(){
     }
 
     public TicketDto(Long tkNumber, String site, TicketPriority ticketPriority, LocalDateTime createdDate,
-                     String description, TicketState ticketState, String type, UserOwnerDto userOwnerDto) {
+                     String description, TicketState ticketState, TicketCategory category, UserOwnerDto userOwnerDto) {
         this.tkNumber = tkNumber;
         this.site = site;
         this.ticketPriority = ticketPriority;
         this.createdDate = createdDate;
         this.description = description;
         this.ticketState = ticketState;
-        this.type = type;
+        this.category = category;
         this.userOwnerDto = userOwnerDto;
     }
 
@@ -78,12 +79,12 @@ public class TicketDto {
         this.ticketState = ticketState;
     }
 
-    public String getType() {
-        return type;
+    public TicketCategory getCategory() {
+        return category;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCategory(TicketCategory category) {
+        this.category = category;
     }
 
     public UserOwnerDto getUserOwnerDto() {

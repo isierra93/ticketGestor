@@ -4,6 +4,7 @@ import com.soluciones.ticketgestor.dtos.SaveTicketDto;
 import com.soluciones.ticketgestor.dtos.TicketDto;
 import com.soluciones.ticketgestor.dtos.UserOwnerDto;
 import com.soluciones.ticketgestor.models.Ticket;
+import com.soluciones.ticketgestor.models.TicketCategory;
 import com.soluciones.ticketgestor.models.User;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class TicketMapper {
         ticketDto.setSite(ticket.getSite());
         ticketDto.setPriority(ticket.getPriority());
         ticketDto.setDescription(ticket.getDescription());
-        ticketDto.setType(ticket.getType());
+        ticketDto.setCategory(ticket.getCategory());
         ticketDto.setState(ticket.getState());
         ticketDto.setCreatedDate(ticket.getCreatedDate());
 
@@ -39,7 +40,7 @@ public class TicketMapper {
         ticket.setSite(saveDto.getSite());
         ticket.setPriority(saveDto.getPriority());
         ticket.setDescription(saveDto.getDescription());
-        ticket.setType(saveDto.getType());
+        ticket.setCategory(saveDto.getCategory());
         ticket.setUser(user);
 
         return ticket;
@@ -50,7 +51,7 @@ public class TicketMapper {
         entity.setSite(dto.getSite());
         entity.setPriority(dto.getPriority());
         entity.setDescription(dto.getDescription());
-        entity.setType(dto.getType());
+        entity.setCategory(dto.getCategory());
         entity.setState(dto.getState());
     }
 

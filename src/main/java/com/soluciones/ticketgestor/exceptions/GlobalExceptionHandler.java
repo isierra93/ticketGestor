@@ -96,6 +96,17 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
         }
 
+        //Mensaje personalizado por Enum Category
+        if (e.getMessage().contains("Category") && e.getMessage().contains("Enum")){
+            ErrorDto errorDto = new ErrorDto(
+                    "Error en la categoría del Ticket.",
+                    "Error en el Enum Categoría del Ticket.",
+                    HttpStatus.BAD_REQUEST.value(),
+                    LocalDateTime.now()
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
+        }
+
         //Mensaje genérico de error
         ErrorDto errorDto = new ErrorDto(
                 "Error de formato en el JSON.",

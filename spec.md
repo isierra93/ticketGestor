@@ -44,12 +44,14 @@ API REST para la gestión de tickets de soporte (issue tracker). Nombre comercia
 | `createdDate`    | LocalDateTime    | Default: `LocalDateTime.now()` al instanciar la entidad |
 | `description`    | String           |                                     |
 | `ticketState`    | `TicketState`    | Default: `ABIERTO` al instanciar la entidad |
-| `type`           | String           |                                     |
+| `category`       | `TicketCategory` | Enum, almacenado como STRING         |
 | `user`           | `User`           | FK `user_id` → `usuarios.id` (`@ManyToOne`) |
 
 **Enum `TicketPriority`:** `URGENTE`, `ALTA`, `MEDIA`, `BAJA`
 
 **Enum `TicketState`:** `ABIERTO`, `ASIGNADO`, `EN_CURSO`, `CERRADO`
+
+**Enum `TicketCategory`:** `LUMINARIAS`, `GRUPO_ELECTROGENO`, `DESMALEZADO`, `BANCO_BATERIAS`, `AIRE_ACONDICIONADO`
 
 ---
 
@@ -148,7 +150,7 @@ Crea un nuevo ticket. El ticket queda asociado al usuario autenticado (extraído
   "site": "Sucursal A",
   "priority": "ALTA",
   "description": "Descripción del problema",
-  "type": "Incidencia"
+  "category": "LUMINARIAS"
 }
 ```
 
@@ -176,7 +178,7 @@ Actualiza todos los campos de un ticket existente. Localiza el ticket por `id` (
   "site": "Sucursal B",
   "priority": "MEDIA",
   "description": "Nueva descripción",
-  "type": "Soporte",
+  "category": "BANCO_BATERIAS",
   "state": "EN_CURSO"
 }
 ```
@@ -263,8 +265,8 @@ Elimina un ticket por su `id`. **Requiere rol `ROLE_ADMIN`.**
 |------------------------|------------------------------------------------------------------------|---------------------------|
 | `UserDto`              | email, password                                                        | body de /auth/register y /auth/login |
 | `TokenDto`             | token                                                                  | respuesta de /auth/login  |
-| `SaveTicketDto`        | tkNumber, site, priority, description, type                            | body de POST /ticket      |
-| `TicketDto`            | tkNumber, site, priority, createdDate, description, state, type, userOwnerDto | respuesta de ticket; body de PUT /ticket |
+| `SaveTicketDto`        | tkNumber, site, priority, description, category                        | body de POST /ticket      |
+| `TicketDto`            | tkNumber, site, priority, createdDate, description, state, category, userOwnerDto | respuesta de ticket; body de PUT /ticket |
 | `TicketStateUpdateDto` | state                                                                  | body de PATCH /ticket/{id}/state |
 | `SaveCommentDto`       | comment                                                                | body de POST /ticket/{id}/comments |
 | `CommentDto`           | id, createdAt, comment, userOwnerDto                                   | respuesta de comentario    |
@@ -287,7 +289,7 @@ Elimina un ticket por su `id`. **Requiere rol `ROLE_ADMIN`.**
 
 ### Creación de ticket
 
-1. `tkNumber`, `site`, `priority`, `description`, `state` y `type` no pueden ser nulos (`ResourceIncompleteException` → 400). En la práctica, `state` siempre es `ABIERTO` por default de la entidad, por lo que la validación de `state` en el POST nunca falla.
+1. `tkNumber`, `site`, `priority`, `description`, `state`, `category` no pueden ser nulos (`ResourceIncompleteException` → 400). En la práctica, `state` siempre es `ABIERTO` por default de la entidad, por lo que la validación de `state` en el POST nunca falla.
 2. `tkNumber` debe ser único entre todos los tickets (`ResourceAlreadyExistsException` → 409).
 3. El ticket queda vinculado al usuario autenticado que hace el request.
 
@@ -371,7 +373,7 @@ com.soluciones.ticketgestor
 │                    TicketStateUpdateDto, TokenDto, UserDto, UserOwnerDto
 ├── exceptions/      GlobalExceptionHandler + 4 excepciones custom (Runtime)
 ├── mappers/         CommentMapper, TicketMapper, UserMapper  (conversión manual, sin MapStruct)
-├── models/          Comment, Ticket, User + enums TicketPriority, TicketState, UserRole
+├── models/          Comment, Ticket, User + enums TicketCategory, TicketPriority, TicketState, UserRole
 ├── repositories/    CommentRepository, TicketRepository, UserRepository  (Spring Data JPA)
 ├── security/        JwtAuthenticationFilter, JwtAuthenticationEntryPoint, JwtUtils,
 │                    SecurityConfig, OpenApiConfig
@@ -400,6 +402,7 @@ Cada servicio tiene interfaz + implementación marcada `@Primary`. `UserDetailsS
 | `InvalidDataFormatException`    | 400  |
 | `HttpMessageNotReadableException` (enum inválido de Priority) | 400 con mensaje específico |
 | `HttpMessageNotReadableException` (enum inválido de State)    | 400 con mensaje específico |
+| `HttpMessageNotReadableException` (enum inválido de Category) | 400 con mensaje específico |
 | `HttpMessageNotReadableException` (otros)                     | 400 genérico |
 | `BadCredentialsException`       | 401  |
 | `AccessDeniedException`         | 403  |

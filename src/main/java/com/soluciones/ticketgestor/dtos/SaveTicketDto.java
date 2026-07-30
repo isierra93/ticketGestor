@@ -1,6 +1,7 @@
 package com.soluciones.ticketgestor.dtos;
 
 
+import com.soluciones.ticketgestor.models.TicketCategory;
 import com.soluciones.ticketgestor.models.TicketPriority;
 
 public class SaveTicketDto {
@@ -8,17 +9,17 @@ public class SaveTicketDto {
     private String site;
     private TicketPriority ticketPriority;
     private String description;
-    private String type;
+    private TicketCategory category;
 
     public SaveTicketDto() {
     }
 
-    public SaveTicketDto(Long tkNumber, String site, TicketPriority ticketPriority, String description, String type) {
+    public SaveTicketDto(Long tkNumber, String site, TicketPriority ticketPriority, String description, TicketCategory category) {
         this.tkNumber = tkNumber;
         this.site = site;
         this.ticketPriority = ticketPriority;
         this.description = description;
-        this.type = type;
+        this.category = category;
     }
 
     public Long getTkNumber() {
@@ -53,11 +54,11 @@ public class SaveTicketDto {
         this.description = description;
     }
 
-    public String getType() {
-        return type;
+    public TicketCategory getCategory() {
+        return category;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCategory(TicketCategory category) {
+        this.category = category;
     }
 }

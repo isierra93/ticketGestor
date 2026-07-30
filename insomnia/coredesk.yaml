@@ -1,0 +1,280 @@
+_type: export
+__export_format: 4
+__export_date: "2026-07-23T12:00:00.000Z"
+__export_source: "opencode"
+
+resources:
+  # ===================== WORKSPACE =====================
+  - _id: wrk_coredesk
+    type: workspace
+    parentId: null
+    name: CoreDesk API
+    description: |-
+      Colección de requests para desarrollo de CoreDesk (Ticket Gestor).
+
+      ## Workflow
+      1. **Registrar usuarios**: `Register (CLIENT)`.
+      2. **Promover roles**: correr `insomnia/seed-admin.sql` en MySQL (promueve admin@demo.com a ADMIN y agente1@demo.com a AGENT).
+      3. **Loguearse**: `Login as (CLIENT)` — el token se inyecta automáticamente en requests protegidas via template tag.
+      4. **Crear un ticket**: `Crear ticket`. Luego actualizar `ticket_id` en el environment con el ID devuelto en el header `Location`.
+      5. **Probar**: operaciones GET / PUT / PATCH / DELETE sobre el ticket creado.
+      6. **Solo ADMIN**: `Eliminar ticket (DELETE)` usa el token de `Login as (ADMIN)`.
+
+      ## Environments
+      - **Base Environment**: `base_url: http://localhost:8080/api/v1` + datos mock (emails, passwords).
+      - **Prod (sub-environment)**: sobreescribe `base_url` para apuntar a producción.
+    scope: collection
+
+  # ===================== ENVIRONMENTS =====================
+  - _id: env_base
+    type: environment
+    parentId: wrk_coredesk
+    name: Base Environment
+    data:
+      base_url: http://localhost:8080/api/v1
+      ticket_id: "1"
+      client1_email: cliente1@demo.com
+      client1_pass: Demo1234
+      client2_email: cliente2@demo.com
+      client2_pass: Demo1234
+      admin_email: admin@demo.com
+      admin_pass: Demo1234
+      agent_email: agente1@demo.com
+      agent_pass: Demo1234
+
+  - _id: env_prod
+    type: environment
+    parentId: env_base
+    name: Prod
+    data:
+      base_url: https://coredesk.isierra93.site/api/v1
+
+  # ===================== FOLDER: AUTH =====================
+  - _id: fld_auth
+    type: request_group
+    parentId: wrk_coredesk
+    name: Auth
+    description: Endpoints públicos de autenticación (no requieren JWT).
+
+  # --- Register (CLIENT) ---
+  - _id: req_register_client
+    type: request
+    parentId: fld_auth
+    name: Register (CLIENT)
+    url: "{{ _.base_url }}/auth/register"
+    method: POST
+    body:
+      mimeType: application/json
+      text: '{"email":"{{ _.client1_email }}","password":"{{ _.client1_pass }}"}'
+    description: |-
+      Registra un nuevo usuario con rol CLIENT.
+      Público — no requiere token.
+      Respuesta: 201 (sin body).
+
+  # --- Login as (CLIENT) ---
+  - _id: req_login_client
+    type: request
+    parentId: fld_auth
+    name: Login as (CLIENT)
+    url: "{{ _.base_url }}/auth/login"
+    method: POST
+    body:
+      mimeType: application/json
+      text: '{"email":"{{ _.client1_email }}","password":"{{ _.client1_pass }}"}'
+    description: |-
+      Inicia sesión como cliente1@demo.com y obtiene un JWT.
+      Público — no requiere token.
+      Respuesta: 200 con {"token":"..."}.
+      **Este request es la fuente del token** para la mayoría de las requests protegidas.
+      Template tag usado: {% request 'Login as (CLIENT)' 'response.body.token' %}
+
+  # --- Login as (ADMIN) ---
+  - _id: req_login_admin
+    type: request
+    parentId: fld_auth
+    name: Login as (ADMIN)
+    url: "{{ _.base_url }}/auth/login"
+    method: POST
+    body:
+      mimeType: application/json
+      text: '{"email":"{{ _.admin_email }}","password":"{{ _.admin_pass }}"}'
+    description: |-
+      Inicia sesión como admin@demo.com y obtiene un JWT.
+      **Setup previo requerido:**
+      1. Cambiar temporalmente email/password en el body a {{ _.admin_email }} / {{ _.admin_pass }}
+         y ejecutar `Register (CLIENT)` para crear el usuario (nace como CLIENT).
+      2. Correr insomnia/seed-admin.sql en la DB para promoverlo a ADMIN.
+      3. Recién entonces Login as (ADMIN) funcionará.
+
+      Template tag usado en DELETE: {% request 'Login as (ADMIN)' 'response.body.token' %}
+
+  # --- Login as (AGENT) ---
+  - _id: req_login_agent
+    type: request
+    parentId: fld_auth
+    name: Login as (AGENT)
+    url: "{{ _.base_url }}/auth/login"
+    method: POST
+    body:
+      mimeType: application/json
+      text: '{"email":"{{ _.agent_email }}","password":"{{ _.agent_pass }}"}'
+    description: |-
+      Inicia sesión como agente1@demo.com y obtiene un JWT.
+      Requiere seed-admin.sql para promover el rol en DB.
+      Usar este token para probar la restricción de AGENT en PATCH
+      (solo puede establecer EN_CURSO o CERRADO).
+
+  # ===================== FOLDER: TICKETS =====================
+  - _id: fld_tickets
+    type: request_group
+    parentId: wrk_coredesk
+    name: Tickets
+    description: |-
+      CRUD de tickets. Todas requieren JWT.
+
+      El token se inyecta automáticamente via template tag desde "Login as (CLIENT)".
+      DELETE usa token de "Login as (ADMIN)" (requiere seed).
+
+      **ticket_id**: luego de crear un ticket, copiar el ID del header `Location`
+      y actualizar `ticket_id` en el environment Base.
+
+  # --- Listar tickets ---
+  - _id: req_tickets_list
+    type: request
+    parentId: fld_tickets
+    name: Listar tickets
+    url: "{{ _.base_url }}/ticket"
+    method: GET
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (CLIENT)' 'response.body.token' %}"
+    description: |-
+      Obtiene todos los tickets del sistema.
+      Token desde: Login as (CLIENT).
+
+  # --- Obtener ticket por ID ---
+  - _id: req_tickets_get
+    type: request
+    parentId: fld_tickets
+    name: Obtener ticket por ID
+    url: "{{ _.base_url }}/ticket/{{ _.ticket_id }}"
+    method: GET
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (CLIENT)' 'response.body.token' %}"
+    description: |-
+      Obtiene un ticket por su ID (PK de base de datos).
+      Token desde: Login as (CLIENT).
+
+  # --- Crear ticket ---
+  - _id: req_tickets_create
+    type: request
+    parentId: fld_tickets
+    name: Crear ticket
+    url: "{{ _.base_url }}/ticket"
+    method: POST
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (CLIENT)' 'response.body.token' %}"
+    body:
+      mimeType: application/json
+      text: '{"tkNumber":1001,"site":"Sucursal Centro","priority":"ALTA","description":"El servidor del piso 8 no responde. Los usuarios no pueden acceder al sistema contable."}'
+    description: |-
+      Crea un ticket. El usuario autenticado queda como owner.
+      El state nace siempre como ABIERTO (lo ignora del body).
+      Token desde: Login as (CLIENT).
+      **Luego de crear**: copiar el ID del header `Location` (ej. /api/v1/ticket/5 → ticket_id = 5)
+      y actualizar la variable `ticket_id` en el environment Base.
+
+  # --- Actualizar ticket (PUT) ---
+  - _id: req_tickets_update
+    type: request
+    parentId: fld_tickets
+    name: Actualizar ticket (PUT)
+    url: "{{ _.base_url }}/ticket/{{ _.ticket_id }}"
+    method: PUT
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (CLIENT)' 'response.body.token' %}"
+    body:
+      mimeType: application/json
+      text: '{"tkNumber":1001,"site":"Sucursal Centro - Piso 8","priority":"URGENTE","description":"Escalado a soporte técnico. Se necesita reemplazar la placa de red del servidor.","state":"EN_CURSO"}'
+    description: |-
+      Actualiza todos los campos editables del ticket.
+      No actualiza createdDate ni userOwner.
+      Token desde: Login as (CLIENT).
+      Requiere: ticket_id seteado en el environment.
+
+  # --- Cambiar estado (PATCH) ---
+  - _id: req_tickets_patch
+    type: request
+    parentId: fld_tickets
+    name: Cambiar estado (PATCH)
+    url: "{{ _.base_url }}/ticket/{{ _.ticket_id }}/state"
+    method: PATCH
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (CLIENT)' 'response.body.token' %}"
+    body:
+      mimeType: application/json
+      text: '{"state":"EN_CURSO"}'
+    description: |-
+      Actualiza solo el estado del ticket.
+      Token desde: Login as (CLIENT).
+      **Para simular AGENT**: usar token de un AGENT (seed previo) y body {"state":"CERRADO"}.
+      AGENT solo puede EN_CURSO o CERRADO — cualquier otro estado devuelve 400.
+
+  # --- Eliminar ticket (DELETE) ---
+  - _id: req_tickets_delete
+    type: request
+    parentId: fld_tickets
+    name: Eliminar ticket (DELETE)
+    url: "{{ _.base_url }}/ticket/{{ _.ticket_id }}"
+    method: DELETE
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (ADMIN)' 'response.body.token' %}"
+    description: |-
+      Elimina un ticket. Solo ADMIN puede ejecutar esta operación.
+      Token desde: Login as (ADMIN).
+      Requiere: seed-admin.sql ejecutado para admin@demo.com.
+
+  # ===================== FOLDER: COMENTARIOS =====================
+  - _id: fld_comentarios
+    type: request_group
+    parentId: wrk_coredesk
+    name: Comentarios
+    description: |-
+      Comentarios asociados a un ticket. Requieren JWT.
+      Token se inyecta automáticamente via template tag desde "Login as (CLIENT)".
+
+  # --- Listar comentarios ---
+  - _id: req_comentarios_list
+    type: request
+    parentId: fld_comentarios
+    name: Listar comentarios
+    url: "{{ _.base_url }}/ticket/{{ _.ticket_id }}/comments"
+    method: GET
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (CLIENT)' 'response.body.token' %}"
+    description: |-
+      Lista todos los comentarios de un ticket, ordenados por createdAt ASC.
+      Token desde: Login as (CLIENT).
+
+  # --- Crear comentario ---
+  - _id: req_comentarios_create
+    type: request
+    parentId: fld_comentarios
+    name: Crear comentario
+    url: "{{ _.base_url }}/ticket/{{ _.ticket_id }}/comments"
+    method: POST
+    authentication:
+      type: bearer
+      token: "{% request 'Login as (CLIENT)' 'response.body.token' %}"
+    body:
+      mimeType: application/json
+      text: '{"comment":"Se reemplazó la fuente de alimentación y se actualizaron los drivers. El equipo vuelve a funcionar correctamente. Se monitoreará por 48 horas."}'
+    description: |-
+      Agrega un comentario al ticket. El autor se extrae del JWT.
+      Token desde: Login as (CLIENT).

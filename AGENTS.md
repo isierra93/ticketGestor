@@ -115,4 +115,45 @@ All DTOs use manual getters/setters — no Lombok on them.
 - No Lombok `@Data`/`@Builder` on DTOs — manual constructors and getters/setters.
 - No mapstruct.
 
+## Dev workflow — Colección Insomnia
+
+`insomnia/coredesk.yaml` es la colección oficial de requests para desarrollo. Es parte del flujo SDD:
+
+- **Si agregás o cambiás un endpoint en el código, la colección se actualiza en el mismo commit.**
+- Si cambiás un DTO (request/response body), actualizá los bodies mock en la colección.
+- La colección se importa desde Insomnia: File → Import → elegir `insomnia/coredesk.yaml`.
+
+### Auth automática
+
+Las requests protegidas usan el template tag `{% %}` de Insomnia:
+
+```
+{% request 'Login as (CLIENT)' 'response.body.token' %}
+```
+
+Insomnia ejecuta `Login as (CLIENT)` antes de cada request y extrae el token del body JSON. No requiere scripts ni copy/paste manual del JWT.
+
+Para la request `Eliminar ticket (DELETE)` (solo ADMIN), el tag apunta a `Login as (ADMIN)`.
+
+### ticket_id (único paso manual)
+
+Después de ejecutar `Crear ticket`, el header `Location` contiene el ID del ticket nuevo (ej. `Location: /api/v1/ticket/5`). Copiar ese número y actualizar `ticket_id` en el environment Base (dropdown de environments en la toolbar de Insomnia).
+
+### Seed de ADMIN / AGENT
+
+La API solo permite crear usuarios con rol `CLIENT`. Para probar endpoints que requieren `ADMIN` (DELETE) o `AGENT` (PATCH con restricción):
+
+1. Registrar `admin@demo.com` y `agente1@demo.com` via `Register (CLIENT)` (editando temporalmente el body).
+2. Correr el seed SQL:
+
+   ```bash
+   docker compose exec -T mysql mysql -uroot -p1234 db-ticket-gestor < insomnia/seed-admin.sql
+   ```
+
+3. Usar `Login as (ADMIN)` / `Login as (AGENT)` para obtener tokens.
+
+### Formato del archivo
+
+El archivo es YAML v4 de Insomnia. Se puede editar a mano (es diffable en git) o desde la UI de Insomnia re-exportando (`Export → YAML`).
+
 Swagger UI (when running): `/api/v1/swagger-ui/index.html`.

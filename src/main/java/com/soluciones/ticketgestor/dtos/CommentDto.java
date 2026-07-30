@@ -2,20 +2,20 @@ package com.soluciones.ticketgestor.dtos;
 
 import java.time.LocalDateTime;
 
-public class ComentarioDto {
+public class CommentDto {
 
     private Long id;
     private LocalDateTime createdAt;
-    private String comentario;
+    private String comment;
     private UserOwnerDto userOwnerDto;
 
-    public ComentarioDto() {
+    public CommentDto() {
     }
 
-    public ComentarioDto(Long id, LocalDateTime createdAt, String comentario, UserOwnerDto userOwnerDto) {
+    public CommentDto(Long id, LocalDateTime createdAt, String comment, UserOwnerDto userOwnerDto) {
         this.id = id;
         this.createdAt = createdAt;
-        this.comentario = comentario;
+        this.comment = comment;
         this.userOwnerDto = userOwnerDto;
     }
 
@@ -35,12 +35,12 @@ public class ComentarioDto {
         this.createdAt = createdAt;
     }
 
-    public String getComentario() {
-        return comentario;
+    public String getComment() {
+        return comment;
     }
 
-    public void setComentario(String comentario) {
-        this.comentario = comentario;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public UserOwnerDto getUserOwnerDto() {

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comentario {
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +21,8 @@ public class Comentario {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(nullable = false)
-    private String comentario;
+    @Column(name = "comentario", nullable = false)
+    private String comment;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

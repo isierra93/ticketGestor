@@ -1,19 +1,19 @@
 package com.soluciones.ticketgestor.controllers;
 
-import com.soluciones.ticketgestor.dtos.ComentarioDto;
+import com.soluciones.ticketgestor.dtos.CommentDto;
 import com.soluciones.ticketgestor.dtos.ErrorDto;
-import com.soluciones.ticketgestor.dtos.SaveComentarioDto;
+import com.soluciones.ticketgestor.dtos.SaveCommentDto;
 import com.soluciones.ticketgestor.dtos.SaveTicketDto;
 import com.soluciones.ticketgestor.dtos.TicketDto;
 import com.soluciones.ticketgestor.dtos.TicketStateUpdateDto;
 import com.soluciones.ticketgestor.exceptions.InvalidDataFormatException;
-import com.soluciones.ticketgestor.mappers.ComentarioMapper;
+import com.soluciones.ticketgestor.mappers.CommentMapper;
 import com.soluciones.ticketgestor.mappers.TicketMapper;
-import com.soluciones.ticketgestor.models.Comentario;
+import com.soluciones.ticketgestor.models.Comment;
 import com.soluciones.ticketgestor.models.Ticket;
 import com.soluciones.ticketgestor.models.TicketState;
 import com.soluciones.ticketgestor.models.User;
-import com.soluciones.ticketgestor.services.ComentarioService;
+import com.soluciones.ticketgestor.services.CommentService;
 import com.soluciones.ticketgestor.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,16 +45,16 @@ public class TicketController {
     private final TicketService ticketService;
     private final TicketMapper ticketMapper;
     private final UserService userService;
-    private final ComentarioService comentarioService;
-    private final ComentarioMapper comentarioMapper;
+    private final CommentService commentService;
+    private final CommentMapper commentMapper;
 
     public TicketController(TicketService ticketService, TicketMapper ticketMapper, UserService userService,
-                            ComentarioService comentarioService, ComentarioMapper comentarioMapper) {
+                            CommentService commentService, CommentMapper commentMapper) {
         this.ticketService = ticketService;
         this.ticketMapper = ticketMapper;
         this.userService = userService;
-        this.comentarioService = comentarioService;
-        this.comentarioMapper = comentarioMapper;
+        this.commentService = commentService;
+        this.commentMapper = commentMapper;
     }
 
     @Operation(
@@ -413,7 +413,7 @@ public class TicketController {
                             description = "Operación exitosa. Lista de comentarios obtenida correctamente.",
                             content = @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = ComentarioDto.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = CommentDto.class))
                             )
                     ),
                     @ApiResponse(
@@ -454,17 +454,17 @@ public class TicketController {
                     )
             }
     )
-    @GetMapping("/{ticketId}/comentarios")
-    public ResponseEntity<List<ComentarioDto>> getComentariosByTicketId(
+    @GetMapping("/{ticketId}/comments")
+    public ResponseEntity<List<CommentDto>> getCommentsByTicketId(
             @PathVariable
             @Parameter(description = "El ID del ticket del cual obtener los comentarios.")
             Long ticketId) {
 
-        List<ComentarioDto> comentarios = comentarioService.getComentariosByTicketId(ticketId)
+        List<CommentDto> comments = commentService.getCommentsByTicketId(ticketId)
                 .stream()
-                .map(comentarioMapper::toDto)
+                .map(commentMapper::toDto)
                 .toList();
-        return ResponseEntity.ok(comentarios);
+        return ResponseEntity.ok(comments);
     }
 
     @Operation(
@@ -478,7 +478,7 @@ public class TicketController {
                             description = "Operación exitosa. Comentario creado correctamente.",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ComentarioDto.class)
+                                    schema = @Schema(implementation = CommentDto.class)
                             )
                     ),
                     @ApiResponse(
@@ -537,29 +537,29 @@ public class TicketController {
                     )
             }
     )
-    @PostMapping("/{ticketId}/comentarios")
-    public ResponseEntity<ComentarioDto> postComentario(
+    @PostMapping("/{ticketId}/comments")
+    public ResponseEntity<CommentDto> postComment(
             @PathVariable
             @Parameter(description = "El ID del ticket al cual agregar el comentario.")
             Long ticketId,
-            @RequestBody SaveComentarioDto saveComentarioDto,
+            @RequestBody SaveCommentDto saveCommentDto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         User user = userService.getUserByEmail(userDetails.getUsername());
         Ticket ticket = ticketService.getTicketById(ticketId);
 
-        Comentario comentarioEntity = comentarioMapper.toEntity(saveComentarioDto, user, ticket);
-        Comentario savedComentario = comentarioService.createComentario(ticketId, comentarioEntity);
+        Comment commentEntity = commentMapper.toEntity(saveCommentDto, user, ticket);
+        Comment savedComment = commentService.createComment(ticketId, commentEntity);
 
-        ComentarioDto comentarioDto = comentarioMapper.toDto(savedComentario);
+        CommentDto commentDto = commentMapper.toDto(savedComment);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(savedComentario.getId())
+                .buildAndExpand(savedComment.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(comentarioDto);
+        return ResponseEntity.created(location).body(commentDto);
     }
 
     @Operation(
